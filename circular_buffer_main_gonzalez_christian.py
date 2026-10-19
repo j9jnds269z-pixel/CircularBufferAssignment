@@ -1,133 +1,162 @@
 
-# Program Description: Implements a circular buffer using a Python list.
-# Author: Christian Gonzalez
+
+# Program Description: Tests the CircularBuffer class and its operations.
+# Author: Your Name
 # Date: October 19, 2026
 
+"""
+Test circular buffer class to perform data operations.
+"""
 
-class CircularBuffer:
-    """A fixed-size circular buffer that operates as a FIFO queue."""
+# Import the CircularBuffer class.
+from circular_buffer import CircularBuffer
 
-    def __init__(self, capacity):
-        """Initialize the circular buffer."""
-        if capacity <= 0:
-            raise ValueError("Capacity must be greater than zero.")
 
-        self.__capacity = capacity
-        self.__size = 0
-        self.__buffer = [None] * capacity
-        self.__head = 0
-        self.__tail = 0
+def main():
+    """Main function to test the functionality of circular buffer."""
 
-    def get_capacity(self):
-        """Return the capacity."""
-        return self.__capacity
+    capacity = int(input("Enter Buffer Capacity: "))
+    cb = CircularBuffer(capacity)
 
-    def set_capacity(self, capacity):
-        """Set a new capacity while preserving existing items."""
-        if capacity <= 0:
-            raise ValueError("Capacity must be greater than zero.")
+    # 1. Delete operation
+    print("1. Delete operation:")
+    item = cb.delete()
 
-        items = []
-        for i in range(self.__size):
-            items.append(
-                self.__buffer[(self.__head + i) % self.__capacity]
-            )
+    if item is None:
+        print("Buffer is empty")
+    else:
+        print(f"{item} has been deleted")
 
-        items = items[-capacity:]
-        self.__capacity = capacity
-        self.__buffer = [None] * capacity
-        self.__size = len(items)
-        self.__head = 0
+    # 2. Add 15
+    print("2. Add 15:")
+    cb.add(15)
+    print(f"Buffer: {cb}")
 
-        for i, item in enumerate(items):
-            self.__buffer[i] = item
+    # 3. Add 5
+    print("3. Add 5:")
+    cb.add(5)
+    print(f"Buffer: {cb}")
 
-        self.__tail = self.__size % capacity
+    # 4. Delete operation
+    print("4. Delete operation:")
+    item = cb.delete()
+    if item is not None:
+        print(f"{item} has been deleted")
+    print(f"Buffer: {cb}")
 
-    def get_size(self):
-        """Return the number of items in the buffer."""
-        return self.__size
+    # 5. Add 3
+    print("5. Add 3:")
+    cb.add(3)
+    print(f"Buffer: {cb}")
 
-    def get_buffer(self):
-        """Return the underlying list."""
-        return self.__buffer
+    # 6. Add 26
+    print("6. Add 26:")
+    cb.add(26)
+    print(f"Buffer: {cb}")
 
-    def get_head(self):
-        """Return the head index."""
-        return self.__head
+    # 7. Delete operation
+    print("7. Delete operation:")
+    item = cb.delete()
+    if item is not None:
+        print(f"{item} has been deleted")
+    print(f"Buffer: {cb}")
 
-    def get_tail(self):
-        """Return the tail index."""
-        return self.__tail
+    # 8. Add 76
+    print("8. Add 76:")
+    cb.add(76)
+    print(f"Buffer: {cb}")
 
-    def add(self, item):
-        """Add an item, overwriting the oldest item if full."""
-        self.__buffer[self.__tail] = item
-        self.__tail = (self.__tail + 1) % self.__capacity
+    # 9. Add 105
+    print("9. Add 105:")
+    cb.add(105)
+    print(f"Buffer: {cb}")
 
-        if self.__size == self.__capacity:
-            # The oldest item was overwritten.
-            self.__head = (self.__head + 1) % self.__capacity
-        else:
-            self.__size += 1
+    # 10. Search for 48
+    print("10. Search 48:")
+    if cb.find(48):
+        print("48 is in the buffer")
+    else:
+        print("48 is not in the buffer")
 
-    def delete(self):
-        """Remove and return the oldest item."""
-        if self.is_empty():
-            return None
+    # 11. Display first and last items
+    print("11. Display items at first and last")
+    if not cb.is_empty():
+        print(
+            f"{cb.peek_first()} is the first item, "
+            f"and {cb.peek_last()} is the last item"
+        )
+    else:
+        print("Buffer is empty")
 
-        item = self.__buffer[self.__head]
-        self.__buffer[self.__head] = None
-        self.__head = (self.__head + 1) % self.__capacity
-        self.__size -= 1
+    # 12. Calculate the sum
+    print("12. Add all items:")
+    print(f"Sum = {add_all(cb)}")
 
-        if self.__size == 0:
-            self.__head = 0
-            self.__tail = 0
+    # 13. Find the largest and smallest items
+    print("13. Locate the largest/smallest item")
 
-        return item
+    if not cb.is_empty():
+        max_index = get_max_index(cb)
+        min_index = get_min_index(cb)
+        buffer = cb.get_buffer()
 
-    def clear(self):
-        """Clear the buffer and reset its pointers."""
-        self.__buffer = [None] * self.__capacity
-        self.__size = 0
-        self.__head = 0
-        self.__tail = 0
+        print(
+            f"The largest item = {buffer[max_index]} "
+            f"and the smallest item = {buffer[min_index]}"
+        )
+    else:
+        print("Buffer is empty")
 
-    def is_empty(self):
-        """Return True if the buffer is empty."""
-        return self.__size == 0
+    # 14. Clear the buffer
+    print("14. Clear the buffer")
+    cb.clear()
+    print(f"{cb}.")
 
-    def peek_first(self):
-        """Return the first item without removing it."""
-        if self.is_empty():
-            return None
-        return self.__buffer[self.__head]
 
-    def peek_last(self):
-        """Return the last item without removing it."""
-        if self.is_empty():
-            return None
+def add_all(cb):
+    """Add all items in the circular buffer and return their sum."""
+    total = 0
 
-        last_index = (self.__tail - 1) % self.__capacity
-        return self.__buffer[last_index]
+    for i in range(cb.get_size()):
+        index = (cb.get_head() + i) % cb.get_capacity()
+        total += cb.get_buffer()[index]
 
-    def find(self, item):
-        """Return True if the item exists in the buffer."""
-        for i in range(self.__size):
-            index = (self.__head + i) % self.__capacity
-            if self.__buffer[index] == item:
-                return True
-        return False
+    return total
 
-    def __str__(self):
-        """Display items from the head to the tail."""
-        if self.is_empty():
-            return "Buffer is empty"
 
-        items = []
-        for i in range(self.__size):
-            index = (self.__head + i) % self.__capacity
-            items.append(str(self.__buffer[index]))
+def get_max_index(cb):
+    """Return the buffer index containing the largest item."""
+    if cb.is_empty():
+        return -1
 
-        return " --> ".join(items)
+    max_index = cb.get_head()
+
+    for i in range(cb.get_size()):
+        index = (cb.get_head() + i) % cb.get_capacity()
+
+        if cb.get_buffer()[index] > cb.get_buffer()[max_index]:
+            max_index = index
+
+    return max_index
+
+
+def get_min_index(cb):
+    """Return the buffer index containing the smallest item."""
+    if cb.is_empty():
+        return -1
+
+    min_index = cb.get_head()
+
+    for i in range(cb.get_size()):
+        index = (cb.get_head() + i) % cb.get_capacity()
+
+        if cb.get_buffer()[index] < cb.get_buffer()[min_index]:
+            min_index = index
+
+    return min_index
+
+
+if __name__ == '__main__':
+    main()
+
+
